@@ -5,13 +5,12 @@ output:
     keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## Loading and preprocessing the data
 
-```{r load_data}
+
+``` r
 # Unzip the data file if the CSV is not already present
 if (!file.exists("activity.csv")) {
   unzip("repdata_data_activity.zip")
@@ -24,7 +23,27 @@ activity <- read.csv("activity.csv")
 activity$date <- as.Date(activity$date, "%Y-%m-%d")
 
 str(activity)
+```
+
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
+``` r
 head(activity)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
 ```
 
 ---
@@ -35,13 +54,15 @@ head(activity)
 
 **1. Total steps taken per day:**
 
-```{r total_steps}
+
+``` r
 steps_per_day <- tapply(activity$steps, activity$date, sum, na.rm = TRUE)
 ```
 
 **2. Histogram of total steps per day:**
 
-```{r histogram1}
+
+``` r
 hist(steps_per_day,
      main   = "Total Steps Taken Each Day",
      xlab   = "Total Steps per Day",
@@ -50,18 +71,32 @@ hist(steps_per_day,
      breaks = 20)
 ```
 
+![](PA1_template_files/figure-html/histogram1-1.png)<!-- -->
+
 **3. Mean and median of total steps per day:**
 
-```{r mean_median}
+
+``` r
 mean_steps   <- mean(steps_per_day)
 median_steps <- median(steps_per_day)
 
 cat("Mean steps per day:  ", round(mean_steps, 2), "\n")
+```
+
+```
+## Mean steps per day:   9354.23
+```
+
+``` r
 cat("Median steps per day:", median_steps, "\n")
 ```
 
-The **mean** total number of steps taken per day is **`r round(mean_steps, 2)`**
-and the **median** is **`r median_steps`**.
+```
+## Median steps per day: 10395
+```
+
+The **mean** total number of steps taken per day is **9354.23**
+and the **median** is **10395**.
 
 ---
 
@@ -69,7 +104,8 @@ and the **median** is **`r median_steps`**.
 
 **1. Time series plot of average steps per 5-minute interval:**
 
-```{r time_series}
+
+``` r
 avg_by_interval <- tapply(activity$steps, activity$interval, mean, na.rm = TRUE)
 
 interval_df <- data.frame(
@@ -86,18 +122,32 @@ plot(interval_df$interval, interval_df$avg_steps,
      lwd  = 1.5)
 ```
 
+![](PA1_template_files/figure-html/time_series-1.png)<!-- -->
+
 **2. Which 5-minute interval, on average, contains the maximum number of steps?**
 
-```{r max_interval}
+
+``` r
 max_interval <- interval_df$interval[which.max(interval_df$avg_steps)]
 max_steps_val <- round(max(interval_df$avg_steps), 2)
 
 cat("Interval with maximum average steps:", max_interval, "\n")
+```
+
+```
+## Interval with maximum average steps: 835
+```
+
+``` r
 cat("Average steps in that interval:     ", max_steps_val, "\n")
 ```
 
-Interval **`r max_interval`** contains the maximum average number of steps
-(**`r max_steps_val`** steps on average across all days).
+```
+## Average steps in that interval:      206.17
+```
+
+Interval **835** contains the maximum average number of steps
+(**206.17** steps on average across all days).
 
 ---
 
@@ -105,12 +155,17 @@ Interval **`r max_interval`** contains the maximum average number of steps
 
 **1. Total number of missing values in the dataset:**
 
-```{r count_na}
+
+``` r
 total_na <- sum(is.na(activity$steps))
 cat("Total rows with NA steps:", total_na, "\n")
 ```
 
-There are **`r total_na`** missing values (rows where `steps` is `NA`).
+```
+## Total rows with NA steps: 2304
+```
+
+There are **2304** missing values (rows where `steps` is `NA`).
 
 **2. Strategy for filling in missing values:**
 
@@ -121,7 +176,8 @@ variation.
 
 **3. New dataset with missing values filled in:**
 
-```{r impute}
+
+``` r
 activity_imputed <- activity
 
 for (i in seq_len(nrow(activity_imputed))) {
@@ -135,9 +191,14 @@ for (i in seq_len(nrow(activity_imputed))) {
 cat("Missing values remaining after imputation:", sum(is.na(activity_imputed$steps)), "\n")
 ```
 
+```
+## Missing values remaining after imputation: 0
+```
+
 **4. Histogram, mean and median after imputation — and comparison to original estimates:**
 
-```{r histogram2}
+
+``` r
 steps_per_day_imp <- tapply(activity_imputed$steps, activity_imputed$date, sum)
 
 hist(steps_per_day_imp,
@@ -146,18 +207,33 @@ hist(steps_per_day_imp,
      ylab   = "Frequency",
      col    = "coral",
      breaks = 20)
+```
 
+![](PA1_template_files/figure-html/histogram2-1.png)<!-- -->
+
+``` r
 mean_imp   <- mean(steps_per_day_imp)
 median_imp <- median(steps_per_day_imp)
 
 cat("Mean steps per day (imputed):  ", round(mean_imp, 2), "\n")
+```
+
+```
+## Mean steps per day (imputed):   10766.19
+```
+
+``` r
 cat("Median steps per day (imputed):", round(median_imp, 2), "\n")
+```
+
+```
+## Median steps per day (imputed): 10766.19
 ```
 
 | Metric | Before Imputation | After Imputation |
 |--------|:-----------------:|:----------------:|
-| Mean   | `r round(mean_steps, 2)` | `r round(mean_imp, 2)` |
-| Median | `r median_steps`         | `r round(median_imp, 2)` |
+| Mean   | 9354.23 | 1.076619\times 10^{4} |
+| Median | 10395         | 1.076619\times 10^{4} |
 
 **Do these values differ from the first part of the assignment?**
 Yes. Both the mean and median are higher after imputation. Before imputation,
@@ -180,7 +256,8 @@ activity.
 
 **1. Create a new factor variable: weekday vs weekend:**
 
-```{r day_type}
+
+``` r
 activity_imputed$day_type <- ifelse(
   weekdays(activity_imputed$date) %in% c("Saturday", "Sunday"),
   "weekend",
@@ -192,9 +269,16 @@ activity_imputed$day_type <- factor(activity_imputed$day_type,
 table(activity_imputed$day_type)
 ```
 
+```
+## 
+## weekday weekend 
+##   12960    4608
+```
+
 **2. Panel plot: average steps per 5-minute interval for weekdays vs weekends:**
 
-```{r panel_plot}
+
+``` r
 library(lattice)
 
 avg_by_daytype <- aggregate(steps ~ interval + day_type,
@@ -209,6 +293,8 @@ xyplot(steps ~ interval | day_type,
        ylab   = "Number of Steps",
        main   = "Average Steps per Interval: Weekday vs Weekend")
 ```
+
+![](PA1_template_files/figure-html/panel_plot-1.png)<!-- -->
 
 **Are there differences in activity patterns between weekdays and weekends?**
 Yes, there are clear differences:
